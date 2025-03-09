@@ -10,8 +10,8 @@ def load_message():
     except FileNotFoundError:
         return []
 def save_message(message):
-    df = pd.Dataframe(message)
-    df.to_json("message.json", orinet= "records")
+    df = pd.DataFrame(message)
+    df.to_json("message.json", orient= "records")
 
 @app.get("/")
 async def root():
@@ -31,3 +31,25 @@ async def message_test(username, message):
         "message":
             f"Hello {username} YOUR message is {message}"
     }
+@app.post(
+    "/message",
+    response_model=MessageSchema
+)
+async def create_message(body: CreateMessageSchema):
+
+    messages = load_message()
+
+    new_id = max([message['id']for message in messages], default=0) +1
+
+    new_message = MessageSchema(
+        id = new_id,
+        username = body.username,
+        message = body.message
+
+    ).dict()
+    messages.append(new_message)
+
+    save_message(messages)
+    return new_message
+
+    

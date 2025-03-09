@@ -1,7 +1,17 @@
 from fastapi import FastAPI
+import pandas as pd
 from src.schemas import CreateMessageSchema,MessageSchema
 
 app = FastAPI()
+def load_message():
+    try:
+        df = pd.read_json("message.json")
+        return df.to_dict(orient="records")
+    except FileNotFoundError:
+        return []
+def save_message(message):
+    df = pd.Dataframe(message)
+    df.to_json("message.json", orinet= "records")
 
 @app.get("/")
 async def root():

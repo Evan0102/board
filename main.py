@@ -1,21 +1,23 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,HTTPException
 import pandas as pd
 from src.schemas import CreateMessageSchema,MessageSchema
 
 app = FastAPI()
+
 def load_message():
     try:
         df = pd.read_json("message.json")
         return df.to_dict(orient="records")
     except FileNotFoundError:
         return []
+    
 def save_message(message):
     df = pd.DataFrame(message)
     df.to_json("message.json", orient= "records")
 
 @app.get("/")
 async def root():
-    return {
+        return {
         "message": "Hello FastAPI!"
     }
 
@@ -31,25 +33,43 @@ async def message_test(username, message):
         "message":
             f"Hello {username} YOUR message is {message}"
     }
+
 @app.post(
     "/message",
     response_model=MessageSchema
 )
 async def create_message(body: CreateMessageSchema):
-
     messages = load_message()
-
     new_id = max([message['id']for message in messages], default=0) +1
 
     new_message = MessageSchema(
         id = new_id,
         username = body.username,
         message = body.message
-
     ).dict()
     messages.append(new_message)
 
     save_message(messages)
     return new_message
 
-    
+@app.get(
+     "/message/{message_id}",
+     response_model=MessageSchema
+)
+def get_message(message_id: int):
+    messages = load_message()
+    for index in messages:
+          if index["id"] == message_id:
+               return index
+    raise HTTPException(status_code=404, detail="找不到訊息")
+
+@app.get(
+    "/messages",
+    response_model=list[MessageSchema]
+)
+def get_all_messages():
+    # 1. 讀取現有的留言(get or not)
+    messages = load_message()
+    # 2. 回傳留言
+    return messages
+

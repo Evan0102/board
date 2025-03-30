@@ -73,3 +73,14 @@ def get_all_messages():
     # 2. 回傳留言
     return messages
 
+@app.delete(
+     "/message/{message_id}",
+)
+def delete_message(message_id: int):
+     messages = load_message()
+     for index, message in enumerate(messages):
+          if message["id"] == message_id:
+               del messages[index]
+               save_message(messages)
+               return HTTPException(status_code=204, detail="刪除成功")
+

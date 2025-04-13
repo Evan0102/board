@@ -1,6 +1,6 @@
 from fastapi import FastAPI,HTTPException
 import pandas as pd
-from src.schemas import CreateMessageSchema,MessageSchema
+from src.schemas import CreateMessageSchema,MessageSchema,UpdateMessageSchema
 
 app = FastAPI()
 
@@ -84,3 +84,19 @@ def delete_message(message_id: int):
                save_message(messages)
                return HTTPException(status_code=204, detail="刪除成功")
 
+@app.patch(
+     "/message/{message_id}",
+     response_model=MessageSchema
+)
+def update_message(message_id: int, body: UpdateMessageSchema):
+     messages = load_message()
+     for index, message in enumerate(messages):
+         if message["id"] == message_id:
+            if body.username:
+                 messages[index]["username"] = body.username
+            if body.message:
+                 messages[index]["message"] = body.message
+            save_message(messages)
+            return messages[index]
+     raise HTTPException(status_code=404, detail="找不到訊息")
+                     

@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class CreateMessageSchema(BaseModel):
     username: str
@@ -7,7 +8,11 @@ class CreateMessageSchema(BaseModel):
 class MessageSchema(BaseModel):
     id:int
     username: str
-    message: str    
+    message: str 
+
+class UpdateMessageSchema(BaseModel):
+    username: Optional[str] = None
+    message: Optional[str] = None  
 
 try:
     CreateMessageSchema(

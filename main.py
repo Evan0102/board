@@ -1,13 +1,14 @@
-from fastapi import FastAPI,HTTPException
+from fastapi import FastAPI,Depends,HTTPException
 import pandas as pd
-from sqlachemy.orm import Seesion
+from sqlalchemy.orm import Session
 from src.schemas import CreateMessageSchema,MessageSchema,UpdateMessageSchema
 from src.database import Base, engine, SessionLocal
-
+from src.models import Message
+from typing import List
 app = FastAPI()
 
 
-Base.meradata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 
 def get_db():
@@ -67,9 +68,9 @@ def get_message(message_id: int):
     "/messages",
     response_model=list[MessageSchema]
 )
-def get_all_messages():
+def get_all_messages(db:Session = Depends(get_db)):
     # 1. 讀取現有的留言(get or not)
-    messages = load_message()
+    messages = db.query(Message).all()
     # 2. 回傳留言
     return messages
 

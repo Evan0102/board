@@ -12,6 +12,9 @@ class MessageSchema(BaseModel):
     username: str
     message: str 
 
+    class Config:
+        orm_mode = True
+
 
 class UpdateMessageSchema(BaseModel):
     username: Optional[str] = None

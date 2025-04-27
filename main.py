@@ -1,8 +1,22 @@
 from fastapi import FastAPI,HTTPException
 import pandas as pd
+from sqlachemy.orm import Seesion
 from src.schemas import CreateMessageSchema,MessageSchema,UpdateMessageSchema
+from src.database import Base, engine, SessionLocal
 
 app = FastAPI()
+
+
+Base.meradata.create_all(bind=engine)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+    
 
 
 def load_message():

@@ -171,7 +171,9 @@ def get_all_messages(db:Session = Depends(get_db)):
 
 
 @app.delete(
+# 取得單一的留言（需登入）
     "/message/{message_id}",
+    response_model=MessageSchema
 )
 def delete_message(message_id: int, db: Session = Depends(get_db)):
     messages = db.query(Message).filter(Message.id == message_id).first()

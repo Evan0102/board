@@ -140,12 +140,10 @@ def refresh_token(refresh: str, db: Session = Depends(get_db)):
 )
 async def create_message(
     body: CreateMessageSchema, 
-    
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     new_message = Message(    
-        username = body.current_user.username,
         username = current_user.username,
         message = body.message
     )
@@ -178,7 +176,6 @@ def get_all_messages(db:Session = Depends(get_db)):
 
 
 @app.delete(
-# 取得單一的留言（需登入）
     "/message/{message_id}",
     response_model=MessageSchema
 )

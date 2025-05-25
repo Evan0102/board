@@ -19,11 +19,20 @@ class UpdateMessageSchema(BaseModel):
     message: Optional[str] = None  
 
 
-class CreateLoginschema(BaseModel):
+class UserSchema(BaseModel):
+    id:int
+    username:str
+    password:str
+
+    class Config:
+        orm_mode = True
+
+
+class CreateLoginSchema(BaseModel):
     username:str
     password:str
 
 
 class JwtTokenSchema(BaseModel):
-    username:str
-    message:str
+    access:str
+    refresh:str

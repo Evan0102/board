@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class CreateMessageSchema(BaseModel):
-    username: str
     message: str
 
 
@@ -17,5 +16,23 @@ class MessageSchema(BaseModel):
 
 
 class UpdateMessageSchema(BaseModel):
-    username: Optional[str] = None
     message: Optional[str] = None  
+
+
+class UserSchema(BaseModel):
+    id:int
+    username:str
+    password:str
+
+    class Config:
+        orm_mode = True
+
+
+class CreateLoginSchema(BaseModel):
+    username:str
+    password:str
+
+
+class JwtTokenSchema(BaseModel):
+    access:str
+    refresh:str

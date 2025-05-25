@@ -146,6 +146,7 @@ async def create_message(
 ):
     new_message = Message(    
         username = body.current_user.username,
+        username = current_user.username,
         message = body.message
     )
     db.add(new_message)
@@ -181,10 +182,16 @@ def get_all_messages(db:Session = Depends(get_db)):
     "/message/{message_id}",
     response_model=MessageSchema
 )
-def delete_message(message_id: int, db: Session = Depends(get_db)):
+def delete_message(
+    message_id: int, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     messages = db.query(Message).filter(Message.id == message_id).first()
     if not messages:
             raise HTTPException(status_code=204, detail="刪除成功")
+    if messages.username != current_user.username:
+        raise HTTPException(status_code=403, detail="只能刪除自己的劉言")
     db.delete(messages)
     db.commit()
     return Response(status_code=204)
@@ -194,10 +201,17 @@ def delete_message(message_id: int, db: Session = Depends(get_db)):
     "/message/{message_id}",
     response_model=MessageSchema
 )
-def update_message(message_id: int, body: UpdateMessageSchema, db: Session = Depends(get_db)):
+def update_message(
+    message_id: int,
+    body: UpdateMessageSchema, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     messages = db.query(Message).filter(Message.id == message_id).first()
     if not messages:
         raise HTTPException(status_code=404, detail="找不到訊息")
+    if messages.username != current_user.username:
+        raise HTTPException(status_code=403, detail="只能編自己的劉言")
     if body.message:
         messages.message = body.message
     db.commit()

@@ -36,22 +36,7 @@ def get_db():
         yield db
     finally:
         db.close()
-        
-
-
-@app.post(
-    "/message",
-    response_model=MessageSchema
-)
-async def create_message(body: CreateMessageSchema, db: Session = Depends(get_db)):
-    new_message = Message(    
-        username = body.username,
-        message = body.message
-    )
-    db.add(new_message)
-    db.commit()
-    db.refresh(new_message)
-    return new_message
+    
 
 def hash_password(password: str) -> str:
     return password_context.hash(password)
@@ -148,6 +133,27 @@ def refresh_token(refresh: str, db: Session = Depends(get_db)):
     refresh_token = create_refresh_token({"sub": user.username})
     return {"access": access_token, "refresh": refresh_token}
 
+
+@app.post(
+    "/message",
+    response_model=MessageSchema
+)
+async def create_message(
+    body: CreateMessageSchema, 
+    
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    new_message = Message(    
+        username = body.current_user.username,
+        message = body.message
+    )
+    db.add(new_message)
+    db.commit()
+    db.refresh(new_message)
+    return new_message
+
+
 @app.get(
     "/message/{message_id}",
     response_model=MessageSchema
@@ -192,8 +198,6 @@ def update_message(message_id: int, body: UpdateMessageSchema, db: Session = Dep
     messages = db.query(Message).filter(Message.id == message_id).first()
     if not messages:
         raise HTTPException(status_code=404, detail="找不到訊息")
-    if body.username:
-        messages.username = body.username
     if body.message:
         messages.message = body.message
     db.commit()
